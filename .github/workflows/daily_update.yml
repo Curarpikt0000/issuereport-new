@@ -3,10 +3,10 @@ name: CME Delivery Notices Bot
 on:
   schedule:
     - cron: '0 3 * * *' # 每天 UTC 时间凌晨 3:00 运行，你可自行调整
-  workflow_dispatch:
+  workflow_dispatch:    # 允许你在 GitHub 网页上手动点击运行
 
 permissions:
-  contents: write
+  contents: write       # 赋予 GitHub Actions 推送代码的权限
 
 jobs:
   run-bot:
@@ -26,29 +26,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 notion-client
 
+      # 1. 运行你的 Python 脚本（抓取数据、下载文件、写入 Notion）
       - name: Run Python Script
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           DATABASE_ID: ${{ secrets.DATABASE_ID }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: python main.py
+        # 注意：确认你的 Python 文件名是不是 main.py，如果不是请改过来
+        run: python main.py 
 
-      - name: Commit and Push downloaded file
-        run: |
-          mkdir -p downloads
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add downloads/
-          git commit -m "Auto-download CME Delivery Notice" || echo "No changes to commit"
-          git push
-      # 之前的步骤可能是运行 python script.py
-      - name: Run Python script
-        env:
-          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-          DATABASE_ID: ${{ secrets.DATABASE_ID }}
-        run: python your_script_name.py
-
-      # ===== 新增下面这段 =====
+      # 2. 将下载到 downloads 文件夹的 PDF 提交并推送到你的 GitHub 仓库
       - name: Commit and push downloaded file
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
