@@ -41,3 +41,16 @@ jobs:
           git add downloads/
           git commit -m "Auto-download CME Delivery Notice" || echo "No changes to commit"
           git push
+      # 之前的步骤可能是运行 python script.py
+      - name: Run Python script
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
+        run: python your_script_name.py
+
+      # ===== 新增下面这段 =====
+      - name: Commit and push downloaded file
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Auto-download latest CME report"
+          file_pattern: "downloads/*"
